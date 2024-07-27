@@ -2,6 +2,7 @@
 using CryptoExchange.Base.Interfaces;
 using CryptoExchange.Server.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace CryptoExchange.Server
 {
@@ -18,12 +19,15 @@ namespace CryptoExchange.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpClient<BitstampService>();
+            builder.Services.AddSingleton<IBitstampAuditService, BitstampAuditService>();
             builder.Services.AddSingleton<IBitstampService, BitstampService>();
             builder.Services.AddDbContextFactory<CryptoExchangeDbContext>(options =>
-                            options.UseSqlServer(builder.Configuration.GetConnectionString("DbProvider")),
+                            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")),
                             lifetime: ServiceLifetime.Singleton);
             var app = builder.Build();
 
+            using IServiceScope serviceScope = app.Services.CreateScope();
+            serviceScope.ServiceProvider.GetRequiredService<CryptoExchangeDbContext>().Database.Migrate();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

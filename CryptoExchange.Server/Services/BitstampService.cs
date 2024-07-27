@@ -8,8 +8,9 @@ using CryptoExchange.Base;
 
 namespace CryptoExchange.Server.Services;
 
-public class BitstampService(HttpClient httpClient) : IBitstampService
+public class BitstampService(HttpClient httpClient, IBitstampAuditService auditService) : IBitstampService
 {
+    private readonly IBitstampAuditService _auditService = auditService;
     public async Task<ActionResult<OrderBookRecord>> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
         OrderBook result = new();
@@ -24,7 +25,9 @@ public class BitstampService(HttpClient httpClient) : IBitstampService
 
         FillOrderBookFromBitmapResponse(ref result, responseString);
 
-        return result.ToRecord();
+        var record = result.ToRecord();
+        await _auditService.SaveOrderBook(record);
+        return record;
     }
 
     private static string GetServiceUrl(string baseCurrencyCode, string quoteCurrencyCode) =>
