@@ -1,8 +1,6 @@
-
 using CryptoExchange.Base.Interfaces;
 using CryptoExchange.Server.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace CryptoExchange.Server
 {
@@ -25,7 +23,7 @@ namespace CryptoExchange.Server
                             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")),
                             lifetime: ServiceLifetime.Singleton);
             var app = builder.Build();
-
+            app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
             using IServiceScope serviceScope = app.Services.CreateScope();
             serviceScope.ServiceProvider.GetRequiredService<CryptoExchangeDbContext>().Database.Migrate();
             // Configure the HTTP request pipeline.

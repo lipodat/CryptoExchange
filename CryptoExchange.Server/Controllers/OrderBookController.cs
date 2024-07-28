@@ -13,6 +13,6 @@ public class OrderBookController(BitstampService service) : ControllerBase
     public async Task<OrderBookRecord?> Get()
     {
         var response = await service.GetOrderBookAsync("btc", "eur");
-        return response.Value;
+        return response;
     }
 }

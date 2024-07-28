@@ -1,0 +1,61 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<div class="d-flex text-center">
+    <div class="bg-darkblue border col rounded p-4 text-white">
+
+        <div class="p-2">
+            <h1 class="m-0">Order book BTC EUR</h1>
+        </div>
+        <div class="d-flex pt-2">
+            <div class="col-6 px-2">
+                <h3 class="px-2">Asks</h3>
+                <div class="border border-black rounded d-flex px-2 text-bg-danger">
+                    <div class="col">
+                        <p class="m-0">Price</p>
+                    </div>
+                    <div class="col">
+                        <p class="m-0">Amount</p>
+                    </div>
+                </div>
+
+                @foreach (var ask in _orderBook.Asks.Take(10))
+                {
+                    <div class="d-flex px-2">
+                        <div class="col text-danger">
+                            @ask.Price
+                        </div>
+                        <div class="col">
+                            @ask.Amount
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="col-6 px-2">
+                <h3 class="px-2">Bids</h3>
+                <div class="border border-black rounded d-flex px-2 text-bg-success">
+                    <div class="col">
+                        <p class="m-0">Price</p>
+                    </div>
+                    <div class="col">
+                        <p class="m-0">Amount</p>
+                    </div>
+                </div>
+
+                @foreach (var bid in _orderBook.Bids.Take(10))
+                {
+                    <div class="d-flex px-2">
+                        <div class="col text-success">
+                            @bid.Price
+                        </div>
+                        <div class="col">
+                            @bid.Amount
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

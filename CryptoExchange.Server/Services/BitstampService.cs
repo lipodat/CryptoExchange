@@ -11,7 +11,7 @@ namespace CryptoExchange.Server.Services;
 public class BitstampService(HttpClient httpClient, IBitstampAuditService auditService) : IBitstampService
 {
     private readonly IBitstampAuditService _auditService = auditService;
-    public async Task<ActionResult<OrderBookRecord>> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
+    public async Task<OrderBookRecord?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
         OrderBook result = new();
         var url = GetServiceUrl(baseCurrencyCode, quoteCurrencyCode);
@@ -19,7 +19,7 @@ public class BitstampService(HttpClient httpClient, IBitstampAuditService auditS
         HttpResponseMessage response = await httpClient.GetAsync(url);
 
         if (!response.IsSuccessStatusCode)
-            return result.ToRecord();
+            return null;
 
         string responseString = await response.Content.ReadAsStringAsync();
 
