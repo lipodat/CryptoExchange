@@ -5,9 +5,9 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoExchange.Server", "CryptoExchange.Server\CryptoExchange.Server.csproj", "{17B890F7-30A3-43B6-BB10-FBB84DE96FF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoExchange.Base", "CryptoExchange.Base\CryptoExchange.Base.csproj", "{341C6E3F-79F5-4EA7-9534-875529C613E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoExchange.Base", "CryptoExchange.Base\CryptoExchange.Base.csproj", "{341C6E3F-79F5-4EA7-9534-875529C613E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoExchange.WebClient", "CryptoExchange.WebClient\CryptoExchange.WebClient.csproj", "{18AD7848-4765-4F68-9949-327A5CF92FA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoExchange.WebClient", "CryptoExchange.WebClient\CryptoExchange.WebClient.csproj", "{18AD7848-4765-4F68-9949-327A5CF92FA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -15,4 +15,18 @@ public class OrderBookController(BitstampService service) : ControllerBase
         var response = await service.GetOrderBookAsync(baseCurrencyCode, quoteCurrencyCode);
         return response;
     }
+
+    [HttpGet("GetAvaliableTimeStamps")]
+    public async Task<Dictionary<long, DateTimeOffset>?> GetAvaliableTimeStamps()
+    {
+        var response = await service.GetAvaliableTimeStamps();
+        return response;
+    }
+
+    [HttpGet("GetOrderBookById/{id}")]
+    public async Task<OrderBookDto?> GetOrderBookById(long id)
+    {
+        var response = await service.GetOrderBookById(id);
+        return response;
+    }
 }

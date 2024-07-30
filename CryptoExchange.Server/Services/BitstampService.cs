@@ -12,6 +12,19 @@ public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExch
 {
     private readonly IDbContextFactory<CryptoExchangeDbContext> _dbContextFactory = dbContextFactory;
     
+    public async Task<Dictionary<long, DateTimeOffset>> GetAvaliableTimeStamps(CancellationToken token = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(token);
+        return await context.OrderBooks.ToDictionaryAsync(x => x.Id, x=> x.TimeStamp, token);
+    }
+
+    public async Task<OrderBookDto?> GetOrderBookById(long id, CancellationToken token = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(token);
+        var orderBook = await context.OrderBooks.Include(x => x.Items).FirstOrDefaultAsync(x => x.Id == id, token);
+        return orderBook?.ToDto();
+    }
+
     public async Task<OrderBookDto?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
         OrderBook result = new();
