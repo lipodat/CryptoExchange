@@ -4,5 +4,5 @@ namespace CryptoExchange.Base.Interfaces;
 
 public interface IBitstampService
 {
-    Task<OrderBookRecord?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode);
+    Task<OrderBookDto?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode);
 }

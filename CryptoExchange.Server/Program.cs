@@ -11,13 +11,10 @@ namespace CryptoExchange.Server
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", true, true);
             var s = Directory.GetCurrentDirectory();
-            // Add services to the container.
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpClient<BitstampService>();
-            builder.Services.AddSingleton<IBitstampAuditService, BitstampAuditService>();
             builder.Services.AddSingleton<IBitstampService, BitstampService>();
             builder.Services.AddDbContextFactory<CryptoExchangeDbContext>(options =>
                             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")),

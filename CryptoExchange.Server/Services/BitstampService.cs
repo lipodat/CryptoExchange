@@ -1,17 +1,18 @@
 ﻿using CryptoExchange.Server.Entities;
 using CryptoExchange.Base.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Globalization;
 using CryptoExchange.Base.Models;
 using CryptoExchange.Base;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptoExchange.Server.Services;
 
-public class BitstampService(HttpClient httpClient, IBitstampAuditService auditService) : IBitstampService
+public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExchangeDbContext> dbContextFactory) : IBitstampService
 {
-    private readonly IBitstampAuditService _auditService = auditService;
-    public async Task<OrderBookRecord?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
+    private readonly IDbContextFactory<CryptoExchangeDbContext> _dbContextFactory = dbContextFactory;
+    
+    public async Task<OrderBookDto?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
         OrderBook result = new();
         var url = GetServiceUrl(baseCurrencyCode, quoteCurrencyCode);
@@ -23,16 +24,20 @@ public class BitstampService(HttpClient httpClient, IBitstampAuditService auditS
 
         string responseString = await response.Content.ReadAsStringAsync();
 
-        FillOrderBookFromBitmapResponse(ref result, responseString);
+        result = FillOrderBookFromBitmapResponse(result, responseString);
 
-        var record = result.ToRecord();
-        await _auditService.SaveOrderBook(record);
-        return record;
+        await SaveOrderBook(result);
+        return result.ToDto();
     }
-
+    private async Task SaveOrderBook(OrderBook orderBook, CancellationToken token = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(token);
+        context.Add(orderBook);
+        await context.SaveChangesAsync(token);
+    }
     private static string GetServiceUrl(string baseCurrencyCode, string quoteCurrencyCode) =>
         $"{Constants.BitstampServiceUrl}{baseCurrencyCode}{quoteCurrencyCode}";
-    private static void FillOrderBookFromBitmapResponse(ref OrderBook orderBook, string response)
+    private static OrderBook FillOrderBookFromBitmapResponse(OrderBook orderBook, string response)
     {
         Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response) ?? [];
 
@@ -45,6 +50,7 @@ public class BitstampService(HttpClient httpClient, IBitstampAuditService auditS
 
         if (data.TryGetValue("asks", out object? boxedAsks))
             orderBook.Items.AddRange(ParseOrderBookItems(boxedAsks, false));
+        return orderBook;
     }
     private static List<OrderBookItem> ParseOrderBookItems(object entries, bool isBid)
     {

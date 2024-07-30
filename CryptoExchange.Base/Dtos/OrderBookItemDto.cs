@@ -2,7 +2,7 @@
 
 namespace CryptoExchange.Base.Models;
 
-public record OrderBookItemRecord
+public class OrderBookItemDto
 {
     public long Id { get; set; }
     public double Price { get; set; }

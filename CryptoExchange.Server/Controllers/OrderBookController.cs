@@ -9,10 +9,10 @@ namespace CryptoExchange.Server.Controllers;
 public class OrderBookController(BitstampService service) : ControllerBase
 {
 
-    [HttpGet(Name = "GetBtcOrderBook")]
-    public async Task<OrderBookRecord?> Get()
+    [HttpGet("{baseCurrencyCode}/{quoteCurrencyCode}")]
+    public async Task<OrderBookDto?> Get(string baseCurrencyCode = "btc", string quoteCurrencyCode = "eur")
     {
-        var response = await service.GetOrderBookAsync("btc", "eur");
+        var response = await service.GetOrderBookAsync(baseCurrencyCode, quoteCurrencyCode);
         return response;
     }
 }

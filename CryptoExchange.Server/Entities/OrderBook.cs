@@ -12,7 +12,7 @@ namespace CryptoExchange.Server.Entities
         {
 
         }
-        public OrderBook(OrderBookRecord orderBookRecord)
+        public OrderBook(OrderBookDto orderBookRecord)
         {
             Id = orderBookRecord.Id;
             TimeStamp = orderBookRecord.TimeStamp;
@@ -20,14 +20,14 @@ namespace CryptoExchange.Server.Entities
             Items.AddRange(orderBookRecord.Bids.Select(x => new OrderBookItem(x, true, this)).ToList());
             Items.AddRange(orderBookRecord.Asks.Select(x => new OrderBookItem(x, false, this)).ToList());
         }
-        public OrderBookRecord ToRecord()
+        public OrderBookDto ToDto()
         {
             return new()
             {
                 Id = Id,
                 TimeStamp = TimeStamp,
-                Bids = Items.Where(x => x.IsBid).Select(x => x.ToRecord()).ToList(),
-                Asks = Items.Where(x => !x.IsBid).Select(x => x.ToRecord()).ToList()
+                Bids = Items.Where(x => x.IsBid).Select(x => x.ToDto()).ToList(),
+                Asks = Items.Where(x => !x.IsBid).Select(x => x.ToDto()).ToList()
             };
         }
     }

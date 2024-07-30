@@ -9,7 +9,7 @@ namespace CryptoExchange.WebClient.Pages;
 public partial class Home
 {
     [Inject] private HttpClient _httpClient { get; set; } = default!;
-    private OrderBookRecord _orderBook = new();
+    private OrderBookDto _orderBook = new();
     private double? _midPointPrice;
     private System.Timers.Timer _timer;
     private double? _userAmount;
@@ -45,7 +45,7 @@ public partial class Home
 
     private async Task UpdateOrderBookAsync()
     {
-        _orderBook = await _httpClient.GetFromJsonAsync<OrderBookRecord?>("OrderBook") ?? new();
+        _orderBook = await _httpClient.GetFromJsonAsync<OrderBookDto?>("OrderBook/btc/eur") ?? new();
         CalculateEstimatedBtcPrice();
         StateHasChanged();
     }

@@ -18,7 +18,7 @@ public class OrderBookItem
 
     }
 
-    public OrderBookItem(OrderBookItemRecord record, bool isBid, OrderBook orderBook)
+    public OrderBookItem(OrderBookItemDto record, bool isBid, OrderBook orderBook)
     {
         Id = record.Id;
         IsBid = isBid;
@@ -26,5 +26,5 @@ public class OrderBookItem
         Amount = record.Amount;
         OrderBook = orderBook;
     }
-    public OrderBookItemRecord ToRecord() => new() { Id = Id, Price = Price, Amount = Amount };
+    public OrderBookItemDto ToDto() => new() { Id = Id, Price = Price, Amount = Amount };
 }
