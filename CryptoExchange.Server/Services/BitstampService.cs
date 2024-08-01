@@ -5,6 +5,7 @@ using System.Globalization;
 using CryptoExchange.Base.Models;
 using CryptoExchange.Base;
 using Microsoft.EntityFrameworkCore;
+using CryptoExchange.Server.Entities.Dto;
 
 namespace CryptoExchange.Server.Services;
 
@@ -27,20 +28,17 @@ public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExch
 
     public async Task<OrderBookDto?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
-        OrderBook result = new();
         var url = GetServiceUrl(baseCurrencyCode, quoteCurrencyCode);
 
-        HttpResponseMessage response = await httpClient.GetAsync(url);
+        var data = await httpClient.GetFromJsonAsync<BitstampOrderBook>(url);
 
-        if (!response.IsSuccessStatusCode)
+        if (data is null)
             return null;
 
-        string responseString = await response.Content.ReadAsStringAsync();
+        var orderBook = data.ToOrderBook();
 
-        result = FillOrderBookFromBitmapResponse(result, responseString);
-
-        await SaveOrderBook(result);
-        return result.ToDto();
+        await SaveOrderBook(orderBook);
+        return orderBook.ToDto();
     }
     private async Task SaveOrderBook(OrderBook orderBook, CancellationToken token = default)
     {
@@ -50,43 +48,4 @@ public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExch
     }
     private static string GetServiceUrl(string baseCurrencyCode, string quoteCurrencyCode) =>
         $"{Constants.BitstampServiceUrl}{baseCurrencyCode}{quoteCurrencyCode}";
-    private static OrderBook FillOrderBookFromBitmapResponse(OrderBook orderBook, string response)
-    {
-        Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response) ?? [];
-
-        if (data.TryGetValue("timestamp", out object? boxedTimestamp) && long.TryParse(boxedTimestamp.ToString(), out long longTimestamp))
-            orderBook.TimeStamp = DateTimeOffset.FromUnixTimeSeconds(longTimestamp);
-
-        orderBook.Items = [];
-        if (data.TryGetValue("bids", out object? boxedBids))
-            orderBook.Items.AddRange(ParseOrderBookItems(boxedBids, true));
-
-        if (data.TryGetValue("asks", out object? boxedAsks))
-            orderBook.Items.AddRange(ParseOrderBookItems(boxedAsks, false));
-        return orderBook;
-    }
-    private static List<OrderBookItem> ParseOrderBookItems(object entries, bool isBid)
-    {
-        var entriesString = entries.ToString();
-        if (string.IsNullOrEmpty(entriesString))
-            return [];
-
-        var boxedList = JsonConvert.DeserializeObject<object[]>($"{entriesString}");
-        if (boxedList is null)
-            return [];
-
-        var result = new List<OrderBookItem>();
-
-        foreach (var entry in boxedList)
-        {
-            var innerArray = JsonConvert.DeserializeObject<object[]>($"{entry}");
-            result.Add(new()
-            {
-                IsBid = isBid,
-                Price = Convert.ToDouble(innerArray?[0], CultureInfo.InvariantCulture),
-                Amount = Convert.ToDouble(innerArray?[1], CultureInfo.InvariantCulture)
-            });
-        }
-        return result;
-    }
 }
