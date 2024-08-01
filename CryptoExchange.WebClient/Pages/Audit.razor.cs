@@ -7,7 +7,7 @@ namespace CryptoExchange.WebClient.Pages;
 
 public partial class Audit
 {
-    [Inject] private HttpClient _httpClient { get; set; } = default!;
+    [Inject] private HttpClient HttpClient { get; set; } = default!;
     private Dictionary<long, DateTimeOffset> _bookTimestamps = [];
     private long? _selectedOrderbookId;
     private OrderBookDto? _orderBook;
@@ -16,13 +16,13 @@ public partial class Audit
 
     protected override async Task OnInitializedAsync()
     {
-        _bookTimestamps = await _httpClient.GetFromJsonAsync<Dictionary<long, DateTimeOffset>?>("OrderBook/GetAvaliableTimeStamps") ?? [];
+        _bookTimestamps = await HttpClient.GetFromJsonAsync<Dictionary<long, DateTimeOffset>?>("OrderBook/GetAvaliableTimeStamps") ?? [];
     }
     private string DisableIfNotSelected() => _selectedOrderbookId is null ? "disabled" : "";
     private async Task LoadOrderBook()
     {
 
-        _orderBook = await _httpClient.GetFromJsonAsync<OrderBookDto?>($"OrderBook/GetOrderBookById/{_selectedOrderbookId}");
+        _orderBook = await HttpClient.GetFromJsonAsync<OrderBookDto?>($"OrderBook/GetOrderBookById/{_selectedOrderbookId}");
         if (_orderBook is null)
             return;
         await RenderChartAsync();

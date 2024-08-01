@@ -11,7 +11,7 @@
             <select class="form-select col flex-grow-1" @bind="_selectedOrderbookId">
                 @foreach (var item in _bookTimestamps)
                 {
-                    <option value="@item.Key">@item.Value</option>
+                    <option value="@item.Key">@item.Value.ToLocalTime()</option>
                 }
             </select>
             <div class="">
@@ -29,7 +29,7 @@
 
             <div class="p-2">
                 <h1 class="m-0">Historical Order book BTC EUR</h1>
-                <p class="m-0">Last updated: @_orderBook.TimeStamp.ToLocalTime()</p>
+                <p class="m-0">For: @_orderBook.TimeStamp.ToLocalTime()</p>
             </div>
             <div class="d-flex pt-2">
                 <div class="col-6 px-2">
@@ -82,5 +82,5 @@
             </div>
         </div>
     </div>
-    <BarChart @ref="barChart" Class="mb-4" />
 }
+<BarChart @ref="barChart" Class="mb-4" />

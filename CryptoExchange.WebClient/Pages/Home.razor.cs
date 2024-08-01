@@ -8,12 +8,13 @@ namespace CryptoExchange.WebClient.Pages;
 
 public partial class Home
 {
-    [Inject] private HttpClient _httpClient { get; set; } = default!;
+    [Inject] private HttpClient HttpClient { get; set; } = default!;
     private OrderBookDto _orderBook = new();
     private double? _midPointPrice;
-    private System.Timers.Timer _timer;
+    private readonly System.Timers.Timer _timer;
     private double? _userAmount;
     private BarChart barChart = default!;
+    private readonly int _refreshRateInSeconds = 10;
     private double? UserAmount
     {
         get
@@ -31,7 +32,7 @@ public partial class Home
     {
         _timer = new()
         {
-            Interval = 10000
+            Interval = _refreshRateInSeconds * 1000
         };
         _timer.Elapsed += async (object? sender, ElapsedEventArgs e) =>
         {
@@ -91,7 +92,7 @@ public partial class Home
 
     private async Task UpdateOrderBookAsync(bool firstRun = false)
     {
-        _orderBook = await _httpClient.GetFromJsonAsync<OrderBookDto?>("OrderBook/btc/eur") ?? new();
+        _orderBook = await HttpClient.GetFromJsonAsync<OrderBookDto?>("OrderBook/btc/eur") ?? new();
         await RenderChartAsync(firstRun);
         CalculateEstimatedBtcPrice();
         StateHasChanged();
