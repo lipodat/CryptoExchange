@@ -12,19 +12,5 @@ public class OrderBookItem
 
     [ForeignKey("OrderBookId")] 
     public OrderBook OrderBook { get; set; } = default!;
-
-    public OrderBookItem()
-    {
-
-    }
-
-    public OrderBookItem(OrderBookItemDto record, bool isBid, OrderBook orderBook)
-    {
-        Id = record.Id;
-        IsBid = isBid;
-        Price = record.Price;
-        Amount = record.Amount;
-        OrderBook = orderBook;
-    }
     public OrderBookItemDto ToDto() => new() { Id = Id, Price = Price, Amount = Amount };
 }

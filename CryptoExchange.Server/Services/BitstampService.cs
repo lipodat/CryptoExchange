@@ -1,7 +1,5 @@
 ﻿using CryptoExchange.Server.Entities;
 using CryptoExchange.Base.Interfaces;
-using Newtonsoft.Json;
-using System.Globalization;
 using CryptoExchange.Base.Models;
 using CryptoExchange.Base;
 using Microsoft.EntityFrameworkCore;
