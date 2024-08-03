@@ -10,11 +10,11 @@ namespace CryptoExchange.Server.Services;
 public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExchangeDbContext> dbContextFactory) : IBitstampService
 {
     private readonly IDbContextFactory<CryptoExchangeDbContext> _dbContextFactory = dbContextFactory;
-    
+
     public async Task<Dictionary<long, DateTimeOffset>> GetAvaliableTimeStamps(CancellationToken token = default)
     {
         await using var context = await _dbContextFactory.CreateDbContextAsync(token);
-        return await context.OrderBooks.ToDictionaryAsync(x => x.Id, x=> x.TimeStamp, token);
+        return await context.OrderBooks.ToDictionaryAsync(x => x.Id, x => x.TimeStamp, token);
     }
 
     public async Task<OrderBookDto?> GetOrderBookById(long id, CancellationToken token = default)
@@ -27,16 +27,23 @@ public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExch
     public async Task<OrderBookDto?> GetOrderBookAsync(string baseCurrencyCode, string quoteCurrencyCode)
     {
         var url = GetServiceUrl(baseCurrencyCode, quoteCurrencyCode);
+        try
+        {
+            var data = await httpClient.GetFromJsonAsync<BitstampOrderBook>(url);
 
-        var data = await httpClient.GetFromJsonAsync<BitstampOrderBook>(url);
+            if (data is null)
+                return null;
 
-        if (data is null)
+            var orderBook = data.ToOrderBook();
+
+            await SaveOrderBook(orderBook);
+            return orderBook.ToDto();
+        }
+        catch (Exception)
+        {
+            // Here should be some log message.
             return null;
-
-        var orderBook = data.ToOrderBook();
-
-        await SaveOrderBook(orderBook);
-        return orderBook.ToDto();
+        }
     }
     private async Task SaveOrderBook(OrderBook orderBook, CancellationToken token = default)
     {
