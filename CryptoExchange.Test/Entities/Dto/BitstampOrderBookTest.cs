@@ -7,17 +7,16 @@ public class BitstampOrderBookTest
 {
     [Theory]
     [ClassData(typeof(OrderBooksGenerator))]
-    public void ReadDateTimeValue_ConvertObjectToValidDateTime_ReturnsDateTime(BitstampOrderBook input, OrderBook expected)
+    public void BitstampOrderBook_ConvertToOrderBook_ReturnsOrderBook(BitstampOrderBook input, OrderBook expected)
     {
         input.ToOrderBook().Should().BeEquivalentTo(expected);
     }
 
     public class OrderBooksGenerator : IEnumerable<object[]>
     {
-        private readonly List<object[]> _list = new()
-            {
-                new object[]
-                {
+        private readonly List<object[]> _list =
+            [
+                [
                     new BitstampOrderBook()
                     {
                         Timestamp = new DateTimeOffset(633555259920000000, new TimeSpan(3, 2, 0)).ToUnixTimeSeconds().ToString(""),
@@ -33,9 +32,8 @@ public class BitstampOrderBookTest
                             new() { Price = 4.2d, Amount = 0.333d, IsBid = true }
                         ]
                     }
-                },
-                new object[]
-                {
+                ],
+                [
                     new BitstampOrderBook()
                     {
                         Timestamp = new DateTimeOffset(633452259920000000, TimeSpan.Zero).ToUnixTimeSeconds().ToString(),
@@ -51,9 +49,8 @@ public class BitstampOrderBookTest
                             new() { Price = 42.2d, Amount = 833d, IsBid = true }
                         ]
                     }
-                },
-                new object[]
-                {
+                ],
+                [
                     new BitstampOrderBook()
                     {
                         Timestamp = new DateTimeOffset(777452259920000000, new TimeSpan(1, 0, 0)).ToUnixTimeSeconds().ToString(),
@@ -69,8 +66,8 @@ public class BitstampOrderBookTest
                             new() { Price = 930.360582214067d, Amount = 8340.336525460027d, IsBid = true }
                         ]
                     }
-                }
-            };
+                ]
+            ];
 
         public IEnumerator<object[]> GetEnumerator()
         { return _list.GetEnumerator(); }
