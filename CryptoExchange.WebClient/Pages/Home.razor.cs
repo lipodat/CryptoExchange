@@ -93,7 +93,7 @@ public partial class Home
     private async Task UpdateOrderBookAsync(bool firstRun = false)
     {
         _orderBook = await HttpClient.GetFromJsonAsync<OrderBookDto?>("OrderBook/btc/eur") ?? new();
-        await RenderChartAsync(firstRun);
+        //await RenderChartAsync(firstRun);
         CalculateEstimatedBtcPrice();
         StateHasChanged();
     }

@@ -7,10 +7,10 @@ using CryptoExchange.Server.Entities.Dto;
 
 namespace CryptoExchange.Server.Services;
 
-public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExchangeDbContext> dbContextFactory) : IBitstampService
+public class BitstampService(IConfiguration configuration, HttpClient httpClient, IDbContextFactory<CryptoExchangeDbContext> dbContextFactory) : IBitstampService
 {
     private readonly IDbContextFactory<CryptoExchangeDbContext> _dbContextFactory = dbContextFactory;
-
+    private IConfiguration _configuration = configuration;
     public async Task<Dictionary<long, DateTimeOffset>> GetAvaliableTimeStamps(CancellationToken token = default)
     {
         await using var context = await _dbContextFactory.CreateDbContextAsync(token);
@@ -51,6 +51,6 @@ public class BitstampService(HttpClient httpClient, IDbContextFactory<CryptoExch
         context.Add(orderBook);
         await context.SaveChangesAsync(token);
     }
-    private static string GetServiceUrl(string baseCurrencyCode, string quoteCurrencyCode) =>
-        $"{Constants.BitstampServiceUrl}{baseCurrencyCode}{quoteCurrencyCode}";
+    private string GetServiceUrl(string baseCurrencyCode, string quoteCurrencyCode) =>
+        $"{_configuration.GetSection("BitstampServiceUrl")?.Get<string>()}{baseCurrencyCode}{quoteCurrencyCode}";
 }

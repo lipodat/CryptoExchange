@@ -1,6 +1,0 @@
-@CryptoExchange.Server_HostAddress = http://localhost:5291
-
-GET {{CryptoExchange.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -2,15 +2,11 @@
 
 namespace CryptoExchange.Test.Services;
 
-public class TestDbContextFactory<TContext> : IDbContextFactory<TContext> where TContext : DbContext
+public class TestDbContextFactory<TContext>(string databaseName = "InMemoryTest") : IDbContextFactory<TContext> where TContext : DbContext
 {
-    private readonly DbContextOptions<TContext> _options;
-    public TestDbContextFactory(string databaseName = "InMemoryTest")
-    {
-        _options = new DbContextOptionsBuilder<TContext>()
+    private readonly DbContextOptions<TContext> _options = new DbContextOptionsBuilder<TContext>()
             .UseInMemoryDatabase(databaseName)
             .Options;
-    }
 
     public TContext CreateDbContext()
     {

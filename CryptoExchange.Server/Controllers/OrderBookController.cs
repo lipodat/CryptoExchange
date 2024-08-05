@@ -1,5 +1,4 @@
-﻿using CryptoExchange.Base.Models;
-using CryptoExchange.Server.Services;
+﻿using CryptoExchange.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoExchange.Server.Controllers;
@@ -10,23 +9,29 @@ public class OrderBookController(BitstampService service) : ControllerBase
 {
 
     [HttpGet("{baseCurrencyCode}/{quoteCurrencyCode}")]
-    public async Task<OrderBookDto?> Get(string baseCurrencyCode = "btc", string quoteCurrencyCode = "eur")
+    public async Task<IActionResult> Get(string baseCurrencyCode = "btc", string quoteCurrencyCode = "eur")
     {
         var response = await service.GetOrderBookAsync(baseCurrencyCode, quoteCurrencyCode);
-        return response;
+        if (response is null)
+            NotFound();
+        return Ok(response);
     }
 
     [HttpGet("GetAvaliableTimeStamps")]
-    public async Task<Dictionary<long, DateTimeOffset>?> GetAvaliableTimeStamps()
+    public async Task<IActionResult> GetAvaliableTimeStamps()
     {
         var response = await service.GetAvaliableTimeStamps();
-        return response;
+        if (response is null)
+            NotFound();
+        return Ok(response);
     }
 
     [HttpGet("GetOrderBookById/{id}")]
-    public async Task<OrderBookDto?> GetOrderBookById(long id)
+    public async Task<IActionResult> GetOrderBookById(long id)
     {
         var response = await service.GetOrderBookById(id);
-        return response;
+        if (response is null)
+            NotFound();
+        return Ok(response);
     }
 }

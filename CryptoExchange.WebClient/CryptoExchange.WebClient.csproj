@@ -16,5 +16,5 @@
   <ItemGroup>
     <ProjectReference Include="..\CryptoExchange.Base\CryptoExchange.Base.csproj" />
   </ItemGroup>
-
+	
 </Project>

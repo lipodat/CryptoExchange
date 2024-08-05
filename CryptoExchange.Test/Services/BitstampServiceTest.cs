@@ -4,6 +4,7 @@ using CryptoExchange.Base.Interfaces;
 using CryptoExchange.Server.Services;
 using NSubstitute;
 using CryptoExchange.Server.Entities;
+using Microsoft.Extensions.Configuration;
 namespace CryptoExchange.Test.Services;
 
 public class BitstampServiceTest
@@ -14,7 +15,8 @@ public class BitstampServiceTest
     {
         _dbContextFactory = new TestDbContextFactory<CryptoExchangeDbContext>(Guid.NewGuid().ToString());
         var httpClient = Substitute.For<HttpClient>();
-        _bitstampService = new BitstampService(httpClient, _dbContextFactory);
+        var configuration = Substitute.For<IConfiguration>();
+        _bitstampService = new BitstampService(configuration, httpClient, _dbContextFactory);
     }
 
     [Fact]
