@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 using System.Timers;
-using BlazorBootstrap;
 
 namespace CryptoExchange.WebClient.Pages;
 
@@ -10,10 +9,8 @@ public partial class Home
 {
     [Inject] private HttpClient HttpClient { get; set; } = default!;
     private OrderBookDto _orderBook = new();
-    private double? _midPointPrice;
-    private readonly System.Timers.Timer _timer;
+    private System.Timers.Timer? _timer;
     private double? _userAmount;
-    private BarChart barChart = default!;
     private readonly int _refreshRateInSeconds = 10;
     private double? UserAmount
     {
@@ -24,11 +21,12 @@ public partial class Home
         set
         {
             _userAmount = value;
-            CalculateUserBtcPrice();
+            CalculateUserPrice();
         }
     }
     private double? _userPrice;
-    public Home()
+
+    protected override async Task OnInitializedAsync()
     {
         _timer = new()
         {
@@ -39,85 +37,33 @@ public partial class Home
             await InvokeAsync(async () => await UpdateOrderBookAsync());
         };
         _timer.Enabled = true;
-    }
-    protected override async Task OnInitializedAsync()
-    {
         await UpdateOrderBookAsync(true);
-        CalculateEstimatedBtcPrice();
-    }
-    private async Task RenderChartAsync(bool firstRun = false)
-    {
-        var topTenAsks = _orderBook.Asks.OrderBy(x => x.Price).Take(10);
-        var firstTenBids = _orderBook.Bids.OrderByDescending(x => x.Price).Take(10).OrderBy(x => x.Price);
-        var data = new ChartData
-        {
-            Labels = [.. firstTenBids.Select(x => x.Price.ToString()), .. topTenAsks.Select(x => x.Price.ToString())],
-            Datasets =
-                [
-                    new BarChartDataset()
-                    {
-                        Label = "Bids",
-                        Data = [ ..firstTenBids.Select(x => x.Amount) ],
-                        BackgroundColor = ["rgb(34, 139, 34)"],
-                        CategoryPercentage = 0.8,
-                        BarPercentage = 1
-                    },
-                    new BarChartDataset()
-                    {
-                        Label = "Asks",
-                        Data = [.. topTenAsks.Select(_ => 0), .. topTenAsks.Select(x => x.Amount) ],
-                        BackgroundColor = ["rgb(178, 34, 34)"],
-                        CategoryPercentage = 0.8,
-                        BarPercentage = 1
-                    }
-                ],
-        };
-
-        var options = new BarChartOptions();
-
-        options.Interaction.Mode = InteractionMode.Index;
-
-        options.Responsive = true;
-
-        options.Scales.X!.Title = new ChartAxesTitle { Text = "Price", Display = true };
-        options.Scales.Y!.Title = new ChartAxesTitle { Text = "Amount", Display = true };
-        options.Scales.X!.Stacked = true;
-
-
-        if (firstRun)
-            await barChart.InitializeAsync(data, options);
-        else
-            await barChart.UpdateAsync(data, options);
+        CalculateUserPrice();
     }
 
     private async Task UpdateOrderBookAsync(bool firstRun = false)
     {
         _orderBook = await HttpClient.GetFromJsonAsync<OrderBookDto?>("OrderBook/btc/eur") ?? new();
-        //await RenderChartAsync(firstRun);
-        CalculateEstimatedBtcPrice();
+        CalculateUserPrice();
         StateHasChanged();
     }
 
-    public void CalculateEstimatedBtcPrice()
+    public void CalculateUserPrice()
     {
-        if (_orderBook is null || _orderBook.Bids?.Count == 0 || _orderBook.Asks?.Count == 0)
+        if (UserAmount is null || _orderBook.Bids.Count == 0)
             return;
-
-        // Calculate weighted average price
-        double totalPriceBids = _orderBook.Bids.OrderByDescending(x => x.Price).Take(10).Sum(bid => bid.Price * bid.Amount);
-        double totalVolumeBids = _orderBook.Bids.OrderByDescending(x => x.Price).Take(10).Sum(bid => bid.Amount);
-
-        double totalPriceAsks = _orderBook.Asks.OrderBy(x => x.Price).Take(10).Sum(ask => ask.Price * ask.Amount);
-        double totalVolumeAsks = _orderBook.Asks.OrderBy(x => x.Price).Take(10).Sum(ask => ask.Amount);
-
-        _midPointPrice = (totalPriceBids + totalPriceAsks) / (totalVolumeBids + totalVolumeAsks);
-        CalculateUserBtcPrice();
+        _userPrice = CalculateBuyPriceRecursive(_orderBook.Asks.OrderBy(x => x.Price), UserAmount.Value, 0);
     }
 
-    public void CalculateUserBtcPrice()
+    private static double CalculateBuyPriceRecursive(IEnumerable<OrderBookItemDto> asks, double remainingAmount, double totalSpent)
     {
-        if (UserAmount is null || _midPointPrice is null)
-            return;
-        _userPrice = UserAmount * _midPointPrice;
+        var currentAsk = asks.FirstOrDefault();
+        if (remainingAmount <= 0 || currentAsk is null)
+            return totalSpent;
+
+        var amountToBuy = Math.Min(currentAsk.Amount, remainingAmount);
+        var spentOnThisAsk = amountToBuy * currentAsk.Price;
+
+        return CalculateBuyPriceRecursive(asks.Skip(1), remainingAmount - amountToBuy, totalSpent + spentOnThisAsk);
     }
 }
