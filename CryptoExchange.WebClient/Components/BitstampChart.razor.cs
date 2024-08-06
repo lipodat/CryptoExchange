@@ -2,7 +2,7 @@
 using CryptoExchange.Base.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace CryptoExchange.WebClient.Pages;
+namespace CryptoExchange.WebClient.Components;
 
 public partial class BitstampChart
 {
