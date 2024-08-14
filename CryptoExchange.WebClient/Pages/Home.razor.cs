@@ -52,18 +52,24 @@ public partial class Home
     {
         if (UserAmount is null || _orderBook.Bids.Count == 0)
             return;
-        _userPrice = CalculateBuyPriceRecursive(_orderBook.Asks.OrderBy(x => x.Price), UserAmount.Value, 0);
+        _userPrice = CalculateBuyPrice(_orderBook.Asks.OrderBy(x => x.Price), UserAmount.Value);
     }
 
-    private static double CalculateBuyPriceRecursive(IEnumerable<OrderBookItemDto> asks, double remainingAmount, double totalSpent)
+    private static double CalculateBuyPrice(IEnumerable<OrderBookItemDto> asks, double desiredAmount)
     {
-        var currentAsk = asks.FirstOrDefault();
-        if (remainingAmount <= 0 || currentAsk is null)
-            return totalSpent;
+        double totalSpent = 0;
+        double remainingAmount = desiredAmount;
 
-        var amountToBuy = Math.Min(currentAsk.Amount, remainingAmount);
-        var spentOnThisAsk = amountToBuy * currentAsk.Price;
+        foreach (var ask in asks)
+        {
+            var amountToBuy = Math.Min(ask.Amount, remainingAmount);
+            totalSpent += amountToBuy * ask.Price;
+            remainingAmount -= amountToBuy;
 
-        return CalculateBuyPriceRecursive(asks.Skip(1), remainingAmount - amountToBuy, totalSpent + spentOnThisAsk);
+            if (remainingAmount <= 0)
+                break;
+        }
+
+        return totalSpent;
     }
 }

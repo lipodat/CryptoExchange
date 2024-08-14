@@ -15,7 +15,11 @@ public class BitstampServiceTest
     {
         _dbContextFactory = new TestDbContextFactory<CryptoExchangeDbContext>(Guid.NewGuid().ToString());
         var httpClient = Substitute.For<HttpClient>();
-        var configuration = Substitute.For<IConfiguration>();
+        var inMemorySettings = new Dictionary<string, string?>
+        {
+            {"BitstampServiceUrl", "https://www.bitstamp.net/api/v2/order_book/"}
+        };
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
         _bitstampService = new BitstampService(configuration, httpClient, _dbContextFactory);
     }
 
