@@ -1,7 +1,8 @@
-﻿using CryptoExchange.Base.Models;
+﻿using CryptoExchange.Base;
+using CryptoExchange.Base.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
 using System.Net.Http.Json;
-using System.Timers;
 
 namespace CryptoExchange.WebClient.Pages;
 
@@ -25,10 +26,19 @@ public partial class Home
         }
     }
     private double? _userPrice;
+    private HubConnection? _hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-        _timer = new()
+        _hubConnection = new HubConnectionBuilder().WithUrl(new Uri(HttpClient.BaseAddress!, Constants.SignalR_Path)).Build();
+        _hubConnection.On<OrderBookDto>(Constants.SignalR_Method, (orderBook) =>
+        {
+            _orderBook = orderBook;
+            CalculateUserPrice();
+            StateHasChanged();
+        });
+        await _hubConnection.StartAsync();
+        /*_timer = new()
         {
             Interval = _refreshRateInSeconds * 1000
         };
@@ -37,8 +47,7 @@ public partial class Home
             await InvokeAsync(async () => await UpdateOrderBookAsync());
         };
         _timer.Enabled = true;
-        await UpdateOrderBookAsync(true);
-        CalculateUserPrice();
+        await UpdateOrderBookAsync(true);*/
     }
 
     private async Task UpdateOrderBookAsync(bool firstRun = false)
