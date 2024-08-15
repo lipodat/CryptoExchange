@@ -2,6 +2,6 @@
 
 public static class Constants
 {
-    public const string SignalR_Method = "ReceiveOrderBook";
-    public const string SignalR_Path = "/orderbook";
+    public const string SignalR_ReceiveOrderBookMethod = "ReceiveOrderBook";
+    public const string SignalR_OrderBookEndpoint = "/orderbook";
 }

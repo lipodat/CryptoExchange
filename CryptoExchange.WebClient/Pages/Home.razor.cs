@@ -9,10 +9,10 @@ namespace CryptoExchange.WebClient.Pages;
 public partial class Home
 {
     [Inject] private HttpClient HttpClient { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
     private OrderBookDto _orderBook = new();
     private System.Timers.Timer? _timer;
     private double? _userAmount;
-    private readonly int _refreshRateInSeconds = 10;
     private double? UserAmount
     {
         get
@@ -26,21 +26,25 @@ public partial class Home
         }
     }
     private double? _userPrice;
+    private string _refreshingInterval = "??";
     private HubConnection? _hubConnection;
+    private double _loadingInterval;
 
     protected override async Task OnInitializedAsync()
     {
-        _hubConnection = new HubConnectionBuilder().WithUrl(new Uri(HttpClient.BaseAddress!, Constants.SignalR_Path)).Build();
-        _hubConnection.On<OrderBookDto>(Constants.SignalR_Method, (orderBook) =>
+        _loadingInterval = Configuration.GetSection("RequestIntervalInSeconds").Get<double>();
+        _hubConnection = new HubConnectionBuilder().WithUrl(new Uri(HttpClient.BaseAddress!, Constants.SignalR_OrderBookEndpoint)).Build();
+        _hubConnection.On<OrderBookDto>(Constants.SignalR_ReceiveOrderBookMethod, (orderBook) =>
         {
             _orderBook = orderBook;
             CalculateUserPrice();
             StateHasChanged();
         });
         await _hubConnection.StartAsync();
+
         /*_timer = new()
         {
-            Interval = _refreshRateInSeconds * 1000
+            Interval = _loadingInterval * 1000
         };
         _timer.Elapsed += async (object? sender, ElapsedEventArgs e) =>
         {

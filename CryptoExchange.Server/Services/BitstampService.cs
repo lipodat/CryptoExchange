@@ -1,7 +1,6 @@
 ﻿using CryptoExchange.Server.Entities;
 using CryptoExchange.Base.Interfaces;
 using CryptoExchange.Base.Models;
-using CryptoExchange.Base;
 using Microsoft.EntityFrameworkCore;
 using CryptoExchange.Server.Entities.Dto;
 

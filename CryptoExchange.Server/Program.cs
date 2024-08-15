@@ -39,7 +39,7 @@ namespace CryptoExchange.Server
             app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHub<OrderBookHub>(Constants.SignalR_Path);
+            app.MapHub<OrderBookHub>(Constants.SignalR_OrderBookEndpoint);
             app.Run();
         }
     }

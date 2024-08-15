@@ -8,7 +8,7 @@ namespace CryptoExchange.Server.Hubs
     {
         public Task SendMessage(OrderBookDto orderBook)
         {
-            return Clients.All.SendAsync(Constants.SignalR_Method, orderBook);
+            return Clients.All.SendAsync(Constants.SignalR_ReceiveOrderBookMethod, orderBook);
         }
     }
 }
